@@ -24,10 +24,7 @@ import com.hnrd.wxPay.utils.TimeUtils;
 @RequestMapping("pay")
 
 /**
- * @author 止剑花下
- * @author 逍遥公子李沧月
- * @author 随风飘扬
- * @author 爱疯
+ * @author 海纳仁东-李海明 
  */
 public class WxController {
 	
