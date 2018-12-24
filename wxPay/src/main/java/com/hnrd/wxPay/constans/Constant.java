@@ -8,17 +8,17 @@ public class Constant {
 
     public static final String DOMAIN = "https://recycle.scublockchain.com";//可访问服务器地址
     //小程序appid
-    public static final String APP_ID = "wxfdd49c2d980831a5";
+    public static final String APP_ID = "wxfdd49c2d980831a5";//申请小程序开发获取，这里随便写的
     
-    public static final String GRANT_TYPE ="authorization_code";
+    public static final String GRANT_TYPE ="authorization_code";//直接写authorization_code
 	//密钥
-    public static final String APP_SECRET = "9211ea8eb9e45236cbadcbed6830b565";
+    public static final String APP_SECRET = "9211ea8eb9e45236cbadcbed6830b565";//申请完小程序后，小程序后台查看
     
     //商户号密钥 操作密码：xuyy0819.
-    public static final String APP_KEY = "qwertyuiopasdfghjklzxcvbnm123456";
+    public static final String APP_KEY = "qwertyuiopasdfghjklzxcvbnm123456";//填写自己的，这里随便写的，注意需要32位
     
     //商户号,需要申请成为商户才能获取
-    public static final String MCH_ID = "1519328271";
+    public static final String MCH_ID = "18584811692";//一串数字，自己去查看
     
     //获取 openid url
     public static final String URL_GET_OPENID="https://api.weixin.qq.com/sns/jscode2session";
