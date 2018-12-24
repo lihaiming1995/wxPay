@@ -232,8 +232,11 @@ public class CommonUtils {
 		}	
 	}
 	public static void main(String[] args) {
-		Map<String,Object> map=object2Map(new PayInfo());
-		map.forEach((k,v)->System.out.println("key:"+k+"\t vulue:"+v));
+		Object str=122;
+		int b =122;
+		Integer a=122;
+		System.out.println(b==(int)str);
+		System.out.println(a.toString().equals("122"));
 	}
 
 }
