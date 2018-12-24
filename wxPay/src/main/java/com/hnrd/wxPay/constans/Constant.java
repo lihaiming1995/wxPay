@@ -6,7 +6,7 @@ package com.hnrd.wxPay.constans;
  */
 public class Constant {
 
-    public static final String DOMAIN = "https://recycle.scublockchain.com";//可访问服务器地址
+    public static final String DOMAIN = "https://xxx.com";//可访问服务器地址即可
     //小程序appid
     public static final String APP_ID = "wxfdd49c2d980831a5";//申请小程序开发获取，这里随便写的
     
@@ -45,7 +45,7 @@ public class Constant {
     public static final String URL_DOWNLOAD_FUNDFLOW= "https://api.mch.weixin.qq.com/pay/downloadfundflow";
     
     //微信支付结果通知页面地址
-    public static final String URL_NOTIFY = Constant.DOMAIN + "/natify/info";
+    public static final String URL_NOTIFY = Constant.DOMAIN + "pay/natify";
     
     //交易保障url
     public static final String URL_REPORT= "https://api.mch.weixin.qq.com/payitil/report";

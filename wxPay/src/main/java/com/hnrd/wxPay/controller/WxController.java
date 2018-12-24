@@ -1,7 +1,5 @@
 package com.hnrd.wxPay.controller;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,8 +22,15 @@ import com.hnrd.wxPay.utils.TimeUtils;
 
 @RestController
 @RequestMapping("pay")
-public class WxController {
 
+/**
+ * @author 止剑花下
+ * @author 逍遥公子李沧月
+ * @author 随风飘扬
+ * @author 爱疯
+ */
+public class WxController {
+	
 	private static final Logger log = LoggerFactory.getLogger(WxController.class);
 
 	/**
@@ -210,6 +215,10 @@ public class WxController {
 			 * 比对数据,如果金额相同，则返回PAY_SUCCESS，否则返回PAY_FAIL
 			 */
 			if (order_total_fee.toString().equals(Total_fee)) {
+				/**
+				 * 金额匹配成功后，确认用户支付成功！对订单进行修改状态操作，修改为已支付状态，这里具体操作根据用户付款后你的操作自定义
+				 * 最后，返回成功结果给微信服务器告诉他我们后台确认完毕，本次支付正确。
+				 */
 				return PAY_SUCCESS;
 			}
 			return PAY_FAIL;
