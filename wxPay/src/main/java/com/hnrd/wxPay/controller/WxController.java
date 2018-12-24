@@ -2,6 +2,7 @@ package com.hnrd.wxPay.controller;
 
 import java.util.Map;
 
+
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +15,9 @@ import com.alibaba.fastjson.JSON;
 import com.hnrd.wxPay.constans.Constant;
 import com.hnrd.wxPay.model.PayInfo;
 import com.hnrd.wxPay.model.WxPayResponesModel;
+import com.hnrd.wxPay.pojo.MerchantOrder;
 import com.hnrd.wxPay.utils.CommonUtils;
 import com.hnrd.wxPay.utils.HttpRequest;
-import com.hnrd.wxPay.utils.StringToLocalDateTimeUtils;
 import com.hnrd.wxPay.utils.TimeUtils;
 
 @RestController
@@ -66,60 +67,81 @@ public class WxController {
 	 */
 	@RequestMapping("unifiedorder")
 	public ResponseEntity<Map<String,Object>> unifiedorder(String outTradeNo,HttpServletRequest request) throws Exception{
+		/**
+		 *  1 .根据商户订单信息构建微信订单，商户订单由自己设计，但一定要包含MerchantOrder里的信息
+		 *  2.MerchantOrder我给了必须的几个字段，如果需要其他字段可根据需求增加
+		 *  3.Merchantorder应根据订单号（outTradeNo）从数据库（最好时redis，mangoDB等缓存数据库）中查询获取，这里为了方便，直接构建一个
+		 */
+		MerchantOrder merchantOrder=new MerchantOrder();
+		merchantOrder.setAttach("备注：随便写");
+		merchantOrder.setBody("商品描述：任意字符串，比如：腾讯服务器实例 x 2");
+		merchantOrder.setDetail("商品详情：任意字符串");
+		merchantOrder.setTotal_fee(1);
+		merchantOrder.setOut_trade_no(outTradeNo);
 		
-		PayInfo payInfo = new PayInfo();//创建微信订单信息对象，应该根据商户订单号查询商户订单后把信息转到微信订单上，这里我直接构建
-		payInfo.setAppid(Constant.APP_ID);
-		payInfo.setAttach("备注：随便写");
-		payInfo.setBody("商品描述：任意字符串，比如：腾讯服务器实例 x 2");
-		payInfo.setDetail("商品详情：任意字符串");
-		payInfo.setDevice_info("WEB"); // 自定义参数，可以为终端设备号(门店号或收银设备ID)，PC网页或公众号内支付可以传"WEB"
-		payInfo.setFee_type("CNY"); // 币种 默认CNY(人民币) 可不填
-		payInfo.setLimit_pay("no_credit"); // 上传此参数no_credit--可限制用户不能使用信用卡支付
-		payInfo.setMch_id(Constant.MCH_ID); // 微信支付分配的商户号
-		payInfo.setNonce_str("nonce_str"); // 随机字符串，长度要求在32位以内。推荐随机数生成算法
-		payInfo.setNotify_url(Constant.URL_NOTIFY); // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
-		payInfo.setOpenid("openid"); // 用户在商户appid下的唯一标识。openid如何获取，可参考 https://developers.weixin.qq.com/miniprogram/dev/api/api-login.html
-		payInfo.setOut_trade_no(outTradeNo);// 商户系统内部订单号，要求32个字符内，只能是数字、大小写字母_-|*且在同一个商户号下唯一
-		payInfo.setSpbill_create_ip(CommonUtils.getClientIp(request)); // APP和H5支付提交用户端ip，Native支付填调用微信支付API的机器IP。
-		payInfo.setTime_start(TimeUtils.getFormatTime(StringToLocalDateTimeUtils.getCTTDateTime())); // 订单生成时间，格式为yyyyMMddHHmmss，如2009年12月25日9点10分10秒表示为20091225091010。其他详见时间规则
-		payInfo.setTime_expire(TimeUtils.getFormatTime(StringToLocalDateTimeUtils.getCTTDateTime().plusMinutes(60))); // 订单失效时间，格式为yyyyMMddHHmmss，如2009年12月27日9点10分10秒表示为20091227091010
-		payInfo.setTotal_fee(1); // 总金额
-		payInfo.setTrade_type("JSAPI"); // 小程序直接写 JSAPI
+		/**
+		 * 获取商户订单后，构建微信订单
+		 */
+		PayInfo payInfo=new PayInfo(merchantOrder, request);
 		
-		// 构建完订单对象，对订单信息进行签名
+		/**
+		 * 构建完订单对象，对订单信息进行签名
+		 */
 		Map<String, Object> map =CommonUtils.object2Map(payInfo);
 		String sign =CommonUtils.createSign(Constant.APP_KEY,map);
 		
-		// 将签名sign写入微信订单信息
+		/**
+		 * 将签名sign写入微信订单信息
+		 */
 		payInfo.setSign(sign);
 		
-		//将订单信息转化为xml格式
+		/**
+		 * 将订单信息转化为xml格式
+		 */
 		String xml = CommonUtils.objectToXML(payInfo);
 		
-		//发送至微信支付服务器
+		/**
+		 * 发送至微信支付服务器
+		 */
 		String result = CommonUtils.sentHttpRequest(Constant.URL_UNIFIED_ORDER, xml);
 		
-		//将返回结果解析成map
+		/**
+		 * 将返回结果解析成map
+		 */
 		Map<String,Object> resultMap = CommonUtils.parseXml(result);
 		resultMap.forEach((k,v)->System.out.println("key:"+k+"\tvalue"+v));
-		//判断返回信息
+		/**
+		 * 获取map中的数据，并根据返回结果进行处理
+		 */
 		if (resultMap.get("return_code").equals("SUCCESS")) { //return_codef返回SUCCESS为通信成功
 			if (resultMap.get("result_code").equals("SUCCESS")) { //result_code返回SUCCESS为获取prepay_id成功
-				//  将获取的数据封装到对象中，签名后连同签名返回给接口调用终端
+				
+				/**
+				 * 将获取的数据封装到对象中，签名后连同签名返回给接口调用的终端
+				 */
 				String prepay_id=(String)resultMap.get("prepay_id");
 				log.info("prepay_id="+prepay_id);
-				//获取其他参数， appId,nonceStr,package,signType,timeStamp 获取值并进行再次签名
+				
+				/**
+				 * 获取其他参数， appId,nonceStr,package,signType,timeStamp 获取值并进行再次签名
+				 */
 				String nonceStr=(String) resultMap.get("nonce_str");
 				log.info("微信返回的随机字符串："+nonceStr);
 				String timeStamp=TimeUtils.localdatetimeTimestamp();	
-				//将要返回的参数封装
+				
+				/**
+				 * 对准备返回的参数进行封装，方便调用签名算法签名，WxPayResponesModel是用来封装参数的对象
+				 */
 				WxPayResponesModel WxPayResponesModel = new WxPayResponesModel();
 				WxPayResponesModel.setAppId(Constant.APP_ID);
 				WxPayResponesModel.setNonceStr(nonceStr);
 				WxPayResponesModel.setPrepay_id(prepay_id);
 				WxPayResponesModel.setSignType("MD5");
 				WxPayResponesModel.setTimeStamp(timeStamp);
-				//对参数再次签名
+				
+				/**
+				 * 对参数再次签名
+				 */
 				Map<String,Object> SignMap = CommonUtils.object2Map(WxPayResponesModel);
 				String signAgain=CommonUtils.createSign(Constant.APP_KEY,SignMap);
 				log.info("微信返回的签名:"+resultMap.get("sign"));
@@ -131,7 +153,9 @@ public class WxController {
 				SignMap.put("signType","MD5");
 				SignMap.put("sign",signAgain);
 				
-				//返回数据
+				/**
+				 * 万事具备了，返回最终结果给前端
+				 */
 				return new ResponseEntity<>(SignMap,HttpStatus.OK); 
 			}
 			return new ResponseEntity<>(resultMap,HttpStatus.OK); 

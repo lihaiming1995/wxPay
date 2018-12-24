@@ -18,7 +18,7 @@ public class Constant {
     public static final String APP_KEY = "qwertyuiopasdfghjklzxcvbnm123456";//填写自己的，这里随便写的，注意需要32位
     
     //商户号,需要申请成为商户才能获取
-    public static final String MCH_ID = "18584811692";//一串数字，自己去查看
+    public static final String MCH_ID = "18584811692";//一串数字，自己去查看自己的商户号
     
     //获取 openid url
     public static final String URL_GET_OPENID="https://api.weixin.qq.com/sns/jscode2session";
@@ -53,10 +53,10 @@ public class Constant {
     //拉取订单评价数据
     public static final String URL_COMMENT="https://api.mch.weixin.qq.com/billcommentsp/batchquerycomment";
     
-    //时间格式
+   //十位数时间格式字符串
     public static final String TIME_FORMAT = "yyyyMMddHHmmss";
     
-    //过期时间
-    public static final int TIME_EXPIRE = 2;  //单位是day
+    //过期时间，单位是day
+    public static final int TIME_EXPIRE = 2;  
 
 }

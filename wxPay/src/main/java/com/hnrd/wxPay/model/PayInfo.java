@@ -2,6 +2,14 @@ package com.hnrd.wxPay.model;
 
 import java.io.Serializable;
 
+import javax.servlet.http.HttpServletRequest;
+
+import com.hnrd.wxPay.constans.Constant;
+import com.hnrd.wxPay.pojo.MerchantOrder;
+import com.hnrd.wxPay.utils.CommonUtils;
+import com.hnrd.wxPay.utils.RandomUtils;
+import com.hnrd.wxPay.utils.TimeUtils;
+
 /**
  * 此对像封装了微信小程序支付时发送给微信服务器的订单数据
  * 详情参考微信支付开发者文档(小程序) https://pay.weixin.qq.com/wiki/doc/api/wxa/wxa_api.php?chapter=9_1
@@ -199,4 +207,29 @@ public class PayInfo implements Serializable{
 	public void setOpenid(String openid) {
 		this.openid = openid;
 	}
+	
+	public PayInfo() {
+		super();
+	}
+
+	public PayInfo(MerchantOrder merchantOrder,HttpServletRequest request) {
+		this.setBody(merchantOrder.getBody()); 
+		this.setDetail(merchantOrder.getDetail());
+		this.setAttach(merchantOrder.getAttach());
+		this.setTotal_fee(merchantOrder.getTotal_fee()); // 总金额
+		this.setOut_trade_no(merchantOrder.getOut_trade_no());// 商户系统内部订单号，要求32个字符内，只能是数字、大小写字母_-|*且在同一个商户号下唯一
+		this.setAppid(Constant.APP_ID);
+		this.setDevice_info("WEB"); // 自定义参数，可以为终端设备号(门店号或收银设备ID)，PC网页或公众号内支付可以传"WEB"
+		this.setFee_type("CNY"); // 币种 默认CNY(人民币) 可不填
+		this.setLimit_pay("no_credit"); // 上传此参数no_credit--可限制用户不能使用信用卡支付
+		this.setMch_id(Constant.MCH_ID); // 微信支付分配的商户号
+		this.setNonce_str(RandomUtils.generateUpperString(32)); // 随机字符串，长度要求在32位以内。推荐随机数生成算法
+		this.setNotify_url(Constant.URL_NOTIFY); // 异步接收微信支付结果通知的回调地址，通知url必须为外网可访问的url，不能携带参数。
+		this.setOpenid("openid"); // 用户在商户appid下的唯一标识。openid如何获取，可参考 https://developers.weixin.qq.com/miniprogram/dev/api/api-login.html
+		this.setTrade_type("JSAPI"); // 小程序直接写 JSAPI
+		this.setSpbill_create_ip(CommonUtils.getClientIp(request)); // APP和H5支付提交用户端ip，Native支付填调用微信支付API的机器IP。
+		this.setTime_start(TimeUtils.getFormatTime(TimeUtils.getCTTDateTime(),10)); // 订单生成时间，格式为yyyyMMddHHmmss，如2009年12月25日9点10分10秒表示为20091225091010。其他详见时间规则
+		this.setTime_expire(TimeUtils.getFormatTime(TimeUtils.getCTTDateTime().plusMinutes(60),10)); // 订单失效时间，格式为yyyyMMddHHmmss，如2009年12月27日9点10分10秒表示为20091227091010
+	}
+	
 }
